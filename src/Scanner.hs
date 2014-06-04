@@ -22,7 +22,14 @@ scan ('\n':xs)    = maybe Nothing (\tokens -> Just (T_Newline:tokens)) $ scan xs
 -- wenn das '-' am Zeilenanfang gelesen wird, ist es Level 0
 -- TODO: noch sind wir sicher am Zeilenanfang, aber nicht mehr unbedingt, wenn wir weitere Fälle einbauen (Links etc.)
 scan ('-':xs)     = maybe Nothing (\tokens -> Just (T_ULI 0:tokens))    $ scan xs
---scan ('  ':xs)    = maybe Nothing ()
+-- bei 2 oder mehr Leerzeichen wird eine neue Zeile eingefuegt
+scan str@(' ':xs) =
+        -- String aufteilen in Whitespaces und Rest
+    let (whitespace, rest) = span (==' ') str
+        -- Anzahl der Whitespaces ist egal, es wird immer nur eine Newline eingefuegt
+        level = min (length whitespace) 2
+    in if level == 2 then maybe Nothing (\tokens -> Just (T_Newline:tokens)) else Nothing    $ scan rest
+   -- in maybe Nothing (\tokens -> Just (T_Newline:tokens))      $ scan rest
 -- sonst lesen wir einfach den Rest bis zum Zeilenende in ein Text-Token ein
 scan str          =
     let (restOfLine, restOfStr) = span (/='\n') str
