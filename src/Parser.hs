@@ -18,6 +18,9 @@ parse (T_H i : T_Text str: xs) = maybe Nothing (\(Sequence ast) -> Just $ Sequen
 -- einem listitem-Marker muss auch ein Text folgen. Das gibt zusammen ein Listitem im AST.
 -- es wird mit der Hilfsfunktion addLI eingefügt
 parse (T_ULI i: T_Text str: xs) = maybe Nothing (\ast -> Just $ addULI (LI str) ast) $ parse xs
+-- einem listitem-Marker muss auch ein Text folgen. Das gibt zusammen ein Listitem im AST.
+-- es wird mit der Hilfsfunktion addLI eingefügt
+parse (T_SLI i: T_Text str: xs) = maybe Nothing (\ast -> Just $ addSLI (LI str) ast) $ parse xs
 -- ein Text am Anfang gehört in einen Absatz. Damit direkt auf einander folgende Texte in einem gemeinsamen
 -- Absatz landen, wird die Hilfsfunktion addP genutzt um den Text einzufügen
 parse (T_Text str: xs)         = maybe Nothing (\ast -> Just $ addP (P str) ast) $ parse xs
@@ -40,3 +43,10 @@ addP :: AST -> AST -> AST
 addP (P str1) (Sequence (P str2 : ast)) = Sequence (P (str1 ++ "\n" ++ str2) : ast)
 -- Andernfalls bleibt der Absatz alleine
 addP p (Sequence ast) = Sequence (p : ast)
+
+-- Einfügen eines Listenelements in eine sortierte Liste
+addSLI :: AST -> AST -> AST
+-- Wenn wir ein Listenelement einfügen wollen und im Rest schon eine SL haben, fügen wir das Element in die SL ein
+addSLI li (Sequence (SL lis : ast)) = Sequence (SL (li:lis) : ast)
+-- Andernfalls erzeugen wir eine neue SL.
+addSLI li (Sequence ast) = Sequence (SL [li] : ast)

@@ -5,6 +5,7 @@ data MDToken = T_Newline     -- '\n'
              | T_H Int       -- ein Header mit der Anzahl der Hashes
              | T_Text String -- Text, aber immer nur bis zum Zeilenende, Text über mehrere Zeilen muss vom Parser zusammengesetzt werden
              | T_ULI Int     -- ein ungeordnetes Listenelement-Marker mit der (Einrückungs-)Ebene
+             | T_SLI Int     -- ein geordnetes Listenelement-Marker mit der (Einrückungs-)Ebene
     deriving (Show, Eq)
 
 scan :: String -> Maybe [MDToken]
@@ -19,19 +20,27 @@ scan str@('#':xs) =
     in maybe Nothing (\tokens -> Just (T_H level:tokens))      $ scan rest
 -- Zeilenumbrüche aufheben um im Parser Leerzeilen zu erkennen
 scan ('\n':xs)    = maybe Nothing (\tokens -> Just (T_Newline:tokens)) $ scan xs
+
 -- wenn das '-' am Zeilenanfang gelesen wird, ist es Level 0
 -- TODO: noch sind wir sicher am Zeilenanfang, aber nicht mehr unbedingt, wenn wir weitere Fälle einbauen (Links etc.)
 scan ('-':xs)     = maybe Nothing (\tokens -> Just (T_ULI 0:tokens))    $ scan xs
--- bei 2 oder mehr Leerzeichen wird eine neue Zeile eingefuegt
-scan str@(' ':xs) =
-        -- String aufteilen in Whitespaces und Rest
-    let (whitespace, rest) = span (==' ') str
-        -- Anzahl der Whitespaces ist egal, es wird immer nur eine Newline eingefuegt
-        level = (length whitespace)
-    in Nothing      $ scan rest
-    if (level) >= 2 
-        then (\tokens -> Just (T_Newline:tokens)) 
--- sonst lesen wir einfach den Rest bis zum Zeilenende in ein Text-Token ein
+scan ('+':xs)     = maybe Nothing (\tokens -> Just (T_ULI 0:tokens))    $ scan xs
+scan ('*':xs)     = maybe Nothing (\tokens -> Just (T_ULI 0:tokens))    $ scan xs
+
+-- wenn eine Zahl gefolgt von einem Punkt da steht, dann soll eine geordnete Liste erzeugt werden
+--scan ('???':xs)     = maybe Nothing (\tokens -> Just (T_SLI 0:tokens))    $ scan xs
+
 scan str          =
     let (restOfLine, restOfStr) = span (/='\n') str
     in maybe Nothing (\tokens -> Just (T_Text restOfLine:tokens)) $ scan restOfStr
+
+
+-- bei 2 oder mehr Leerzeichen wird eine neue Zeile eingefuegt
+--scan str@(' ':xs) =
+        -- String aufteilen in Whitespaces und Rest
+--    let (whitespace, rest) = span (==' ') str
+        -- Anzahl der Whitespaces ist egal, es wird immer nur eine Newline eingefuegt
+--        level = (length whitespace)
+--    in Nothing      $ scan rest
+--    if' (level >= 2)  (\tokens -> Just (T_Newline:tokens)) 
+-- sonst lesen wir einfach den Rest bis zum Zeilenende in ein Text-Token ein

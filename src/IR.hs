@@ -7,4 +7,5 @@ data AST = Sequence [AST] -- eine Sequenz von HTML-Elementen
          | LI String      -- ein Listenelement mit dem Inhalt
          | P String       -- ein Absatz mit dem Inhalt
          | EmptyLine      -- eine leere Zeile
+         | SL [AST]       -- eine sortierte Liste, in der Liste müssen dann die Listenelemente stehen
     deriving (Show)
