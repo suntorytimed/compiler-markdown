@@ -27,9 +27,10 @@ scan str@(' ':xs) =
         -- String aufteilen in Whitespaces und Rest
     let (whitespace, rest) = span (==' ') str
         -- Anzahl der Whitespaces ist egal, es wird immer nur eine Newline eingefuegt
-        level = min (length whitespace) 2
-    in if level == 2 then maybe Nothing (\tokens -> Just (T_Newline:tokens)) else Nothing    $ scan rest
-   -- in maybe Nothing (\tokens -> Just (T_Newline:tokens))      $ scan rest
+        level = (length whitespace)
+    in Nothing      $ scan rest
+    if (level) >= 2 
+        then (\tokens -> Just (T_Newline:tokens)) 
 -- sonst lesen wir einfach den Rest bis zum Zeilenende in ein Text-Token ein
 scan str          =
     let (restOfLine, restOfStr) = span (/='\n') str
