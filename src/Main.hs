@@ -9,6 +9,8 @@ main :: IO ()
 main = do
     -- lese den Inhalt der Datei "test.md" als einen kompletten String ein
     input <- readFile "test.md"
+    putStrLn "Scanner input\n=============="
+    print input
     -- versuche den String zu scannen
     let maybeTokens = scan input
     putStrLn "Scanner output\n=============="
