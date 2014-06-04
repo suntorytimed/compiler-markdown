@@ -22,6 +22,7 @@ scan ('\n':xs)    = maybe Nothing (\tokens -> Just (T_Newline:tokens)) $ scan xs
 -- wenn das '-' am Zeilenanfang gelesen wird, ist es Level 0
 -- TODO: noch sind wir sicher am Zeilenanfang, aber nicht mehr unbedingt, wenn wir weitere Fälle einbauen (Links etc.)
 scan ('-':xs)     = maybe Nothing (\tokens -> Just (T_ULI 0:tokens))    $ scan xs
+scan ('  ':xs)    = maybe Nothing ()
 -- sonst lesen wir einfach den Rest bis zum Zeilenende in ein Text-Token ein
 scan str          =
     let (restOfLine, restOfStr) = span (/='\n') str
