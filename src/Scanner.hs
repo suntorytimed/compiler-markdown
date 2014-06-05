@@ -6,6 +6,7 @@ data MDToken = T_Newline     -- '\n'
              | T_Text String -- Text, aber immer nur bis zum Zeilenende, Text über mehrere Zeilen muss vom Parser zusammengesetzt werden
              | T_ULI Int     -- ein ungeordnetes Listenelement-Marker mit der (Einrückungs-)Ebene
              | T_SLI Int     -- ein geordnetes Listenelement-Marker mit der (Einrückungs-)Ebene
+             | T_White Int   -- ein Header mit der Anzahl der Hashes
     deriving (Show, Eq)
 
 scan :: String -> Maybe [MDToken]
@@ -25,7 +26,7 @@ scan str@(' ':xs) =
     let (whitespace, rest) = span (==' ') str
         -- Anzahl der Whitespaces ist egal, es wird immer nur eine Newline eingefuegt
         level = (length whitespace)
-    in maybe Nothing (\tokens -> Just (T_Newline:tokens))     $ scan rest
+    in maybe Nothing (\tokens -> Just (T_White level:tokens))     $ scan rest
 
 -- sonst lesen wir einfach den Rest bis zum Zeilenende in ein Text-Token ein
 -- Zeilenumbrüche aufheben um im Parser Leerzeilen zu erkennen
