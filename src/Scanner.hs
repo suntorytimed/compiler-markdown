@@ -18,6 +18,16 @@ scan str@('#':xs) =
         -- Anzahl der Hashes ergibt das Level, aber höchstens 6 werden gezählt, der Rest ignoriert
         level = min (length hashes) 6
     in maybe Nothing (\tokens -> Just (T_H level:tokens))      $ scan rest
+    
+    -- bei 2 oder mehr Leerzeichen wird eine neue Zeile eingefuegt
+scan str@(' ':xs) =
+        -- String aufteilen in Whitespaces und Rest
+    let (whitespace, rest) = span (==' ') str
+        -- Anzahl der Whitespaces ist egal, es wird immer nur eine Newline eingefuegt
+        level = (length whitespace)
+    in maybe Nothing (\tokens -> Just (T_Newline:tokens))     $ scan rest
+
+-- sonst lesen wir einfach den Rest bis zum Zeilenende in ein Text-Token ein
 -- Zeilenumbrüche aufheben um im Parser Leerzeilen zu erkennen
 scan ('\n':xs)    = maybe Nothing (\tokens -> Just (T_Newline:tokens)) $ scan xs
 
@@ -35,12 +45,4 @@ scan str          =
     in maybe Nothing (\tokens -> Just (T_Text restOfLine:tokens)) $ scan restOfStr
 
 
--- bei 2 oder mehr Leerzeichen wird eine neue Zeile eingefuegt
---scan str@(' ':xs) =
-        -- String aufteilen in Whitespaces und Rest
---    let (whitespace, rest) = span (==' ') str
-        -- Anzahl der Whitespaces ist egal, es wird immer nur eine Newline eingefuegt
---        level = (length whitespace)
---    in Nothing      $ scan rest
---    if' (level >= 2)  (\tokens -> Just (T_Newline:tokens)) 
--- sonst lesen wir einfach den Rest bis zum Zeilenende in ein Text-Token ein
+
