@@ -1,4 +1,5 @@
 module Scanner where
+import Data.Char (isDigit)
 
 -- MD: Markdown
 data MDToken = T_Newline     -- '\n' 
@@ -7,7 +8,8 @@ data MDToken = T_Newline     -- '\n'
              | T_ULI Int     -- ein ungeordnetes Listenelement-Marker mit der (Einrückungs-)Ebene
              | T_SLI Int     -- ein geordnetes Listenelement-Marker mit der (Einrückungs-)Ebene
              | T_White Int   -- ein Header mit der Anzahl der Hashes
-             | T_Num         -- eine Zahl
+             | T_Num Int     -- eine Zahl mit Anzahl an Stellen
+             | T_Dot         -- ein Punkt
     deriving (Show, Eq)
 
 scan :: String -> Maybe [MDToken]
@@ -27,7 +29,9 @@ scan str@(x:xs)
                     level = (length whitespace)
     in maybe Nothing (\tokens -> Just (T_White level:tokens))     $ scan rest
 
-    |isDigit x = maybe Nothing (\tokens -> Just (T_Num:tokens))
+    |isDigit x = let (num, rest) = span isDigit str
+                     level = (length num)
+    in maybe Nothing (\tokens -> Just (T_Num level:tokens))       $ scan rest
 
 -- sonst lesen wir einfach den Rest bis zum Zeilenende in ein Text-Token ein
 -- Zeilenumbrüche aufheben um im Parser Leerzeilen zu erkennen
@@ -38,6 +42,7 @@ scan ('\n':xs)    = maybe Nothing (\tokens -> Just (T_Newline:tokens)) $ scan xs
 scan ('-':xs)     = maybe Nothing (\tokens -> Just (T_ULI 0:tokens))    $ scan xs
 scan ('+':xs)     = maybe Nothing (\tokens -> Just (T_ULI 0:tokens))    $ scan xs
 scan ('*':xs)     = maybe Nothing (\tokens -> Just (T_ULI 0:tokens))    $ scan xs
+scan ('.':xs)     = maybe Nothing (\tokens -> Just (T_Dot:tokens))    $ scan xs
 
 -- wenn eine Zahl gefolgt von einem Punkt da steht, dann soll eine geordnete Liste erzeugt werden
 --scan (:xs)     = maybe Nothing (\tokens -> Just (T_SLI 0:tokens))    $ scan xs
