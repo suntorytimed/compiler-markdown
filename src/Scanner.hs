@@ -12,7 +12,7 @@ data MDToken = T_Newline     -- '\n'
              | T_Dot         -- ein Punkt
     deriving (Show, Eq)
 
-endChars =")]\n"
+endChars =" )]\n"
 
 scan :: String -> Maybe [MDToken]
 -- Rekursionsende
