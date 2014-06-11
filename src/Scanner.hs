@@ -16,9 +16,12 @@ data MDToken = T_Newline     -- '\n'
              | T_SBracketC   -- eine eckige Klammer geschlossen
              | T_RBracketC   -- eine runde Klammer geschlossen
              | T_WBracketC   -- eine geschweifte Klammer geschlossen
+             | T_Star Int    -- ein Sternchen
+             | T_DDot        -- ein Doppelpunkt
+             | T_BSlash      -- ein Backslash
     deriving (Show, Eq)
 
-endChars =" {[()]}\n"
+endChars =" \\*:{[()]}\n"
 
 scan :: String -> Maybe [MDToken]
 -- Rekursionsende
@@ -37,6 +40,11 @@ scan str@(x:xs)
                     level = (length whitespace)
     in maybe Nothing (\tokens -> Just (T_White level:tokens))     $ scan rest
 
+    |x == '*' = let (star, rest) = span (=='*') str
+                    -- Anzahl der Whitespaces ist egal, es wird immer nur eine Newline eingefuegt
+                    level = (length star)
+    in maybe Nothing (\tokens -> Just (T_Star level:tokens))     $ scan rest
+
     |isDigit x = let (num, rest) = span isDigit str
                      level = (length num)
     in maybe Nothing (\tokens -> Just (T_Num level:tokens))       $ scan rest
@@ -44,7 +52,6 @@ scan str@(x:xs)
     |x=='\n'   = maybe Nothing (\tokens -> Just (T_Newline:tokens))    $ scan xs
     |x=='-'    = maybe Nothing (\tokens -> Just (T_ULI 0:tokens))   $ scan xs
     |x=='+'    = maybe Nothing (\tokens -> Just (T_ULI 0:tokens))   $ scan xs
-    |x=='*'    = maybe Nothing (\tokens -> Just (T_ULI 0:tokens))   $ scan xs
     |x=='.'    = maybe Nothing (\tokens -> Just (T_Dot:tokens))    $ scan xs
     |x=='['    = maybe Nothing (\tokens -> Just (T_SBracketO:tokens))    $scan xs
     |x=='('    = maybe Nothing (\tokens -> Just (T_RBracketO:tokens))    $scan xs
@@ -52,6 +59,8 @@ scan str@(x:xs)
     |x==']'    = maybe Nothing (\tokens -> Just (T_SBracketC:tokens))    $scan xs
     |x==')'    = maybe Nothing (\tokens -> Just (T_RBracketC:tokens))    $scan xs
     |x=='}'    = maybe Nothing (\tokens -> Just (T_WBracketC:tokens))    $scan xs
+    |x==':'    = maybe Nothing (\tokens -> Just (T_DDot:tokens))    $scan xs
+    |x=='\\'   = maybe Nothing (\tokens -> Just (T_BSlash:tokens))    $scan xs
 
 scan str          =
     let (restOfLine, restOfStr) = span (`notElem` endChars) str
