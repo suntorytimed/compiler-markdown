@@ -12,6 +12,8 @@ data MDToken = T_Newline     -- '\n'
              | T_Dot         -- ein Punkt
     deriving (Show, Eq)
 
+endChars =")]\n"
+
 scan :: String -> Maybe [MDToken]
 -- Rekursionsende
 scan ""           = Just []
@@ -33,22 +35,14 @@ scan str@(x:xs)
                      level = (length num)
     in maybe Nothing (\tokens -> Just (T_Num level:tokens))       $ scan rest
 
--- sonst lesen wir einfach den Rest bis zum Zeilenende in ein Text-Token ein
--- Zeilenumbrüche aufheben um im Parser Leerzeilen zu erkennen
-scan ('\n':xs)    = maybe Nothing (\tokens -> Just (T_Newline:tokens)) $ scan xs
-
--- wenn das '-' am Zeilenanfang gelesen wird, ist es Level 0
--- TODO: noch sind wir sicher am Zeilenanfang, aber nicht mehr unbedingt, wenn wir weitere Fälle einbauen (Links etc.)
-scan ('-':xs)     = maybe Nothing (\tokens -> Just (T_ULI 0:tokens))    $ scan xs
-scan ('+':xs)     = maybe Nothing (\tokens -> Just (T_ULI 0:tokens))    $ scan xs
-scan ('*':xs)     = maybe Nothing (\tokens -> Just (T_ULI 0:tokens))    $ scan xs
-scan ('.':xs)     = maybe Nothing (\tokens -> Just (T_Dot:tokens))    $ scan xs
-
--- wenn eine Zahl gefolgt von einem Punkt da steht, dann soll eine geordnete Liste erzeugt werden
---scan (:xs)     = maybe Nothing (\tokens -> Just (T_SLI 0:tokens))    $ scan xs
+    |x=='\n'    = maybe Nothing (\tokens -> Just (T_Newline:tokens))    $ scan xs
+    |x=='-'     = maybe Nothing (\tokens -> Just (T_ULI 0:tokens))   $ scan xs
+    |x=='+'     = maybe Nothing (\tokens -> Just (T_ULI 0:tokens))   $ scan xs
+    |x=='*'     = maybe Nothing (\tokens -> Just (T_ULI 0:tokens))   $ scan xs
+    |x=='.'     = maybe Nothing (\tokens -> Just (T_Dot:tokens))    $ scan xs
 
 scan str          =
-    let (restOfLine, restOfStr) = span (/='\n') str
+    let (restOfLine, restOfStr) = span (`notElem` endChars) str
     in maybe Nothing (\tokens -> Just (T_Text restOfLine:tokens)) $ scan restOfStr
 
 
