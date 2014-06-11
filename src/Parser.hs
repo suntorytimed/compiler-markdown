@@ -26,7 +26,9 @@ parse (T_SLI i: T_Text str: xs) = maybe Nothing (\ast -> Just $ addSLI (LI str) 
 parse (T_Text str: xs)         = maybe Nothing (\ast -> Just $ addP (P str) ast) $ parse xs
 -- Der gesamte Rest wird für den Moment ignoriert. Achtung: Der Parser schlägt, in der momentanen Implementierung, nie fehl.
 -- Das kann in der Endfassung natürlich nicht so bleiben!
-parse _ = Just $ Sequence []
+parse ts = error $ show ts
+--parse _ = Sequence []
+
 
 -- Hilfsfunktionen für den Parser
 
