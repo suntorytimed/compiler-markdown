@@ -22,9 +22,10 @@ data MDToken = T_Newline     -- '\n'
              | T_DDot        -- ein Doppelpunkt
              | T_BSlash      -- ein Backslash
              | T_ExMark      -- ein Ausrufezeichen
+             | T_BQuote Int  -- ein Backquote`
     deriving (Show, Eq)
 
-endChars =" \\*:<{[()]}>\n"
+endChars =" \\`*:<{[()]}>.\n"
 
 scan :: String -> Maybe [MDToken]
 -- Rekursionsende
@@ -39,13 +40,17 @@ scan str@(x:xs)
 
     -- String aufteilen in Whitespaces und Rest
     |x == ' ' = let (whitespace, rest) = span (==' ') str
-                    -- Anzahl der Whitespaces ist egal, es wird immer nur eine Newline eingefuegt
                     level = (length whitespace)
     in maybe Nothing (\tokens -> Just (T_White level:tokens))     $ scan rest
 
     |x == '*' = let (star, rest) = span (=='*') str
                     -- Anzahl der Whitespaces ist egal, es wird immer nur eine Newline eingefuegt
                     level = (length star)
+    in maybe Nothing (\tokens -> Just (T_Star level:tokens))     $ scan rest
+
+    |x == '`' = let (bq, rest) = span (=='`') str
+                    -- Anzahl der Backquotes ist egal, es wird immer nur eine Newline eingefuegt
+                    level = (length bq)
     in maybe Nothing (\tokens -> Just (T_Star level:tokens))     $ scan rest
 
     |isDigit x = let (num, rest) = span isDigit str
