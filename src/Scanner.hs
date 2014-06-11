@@ -13,15 +13,18 @@ data MDToken = T_Newline     -- '\n'
              | T_SBracketO   -- eine eckige Klammer geoeffnet
              | T_RBracketO   -- eine runde Klammer geoeffnet
              | T_WBracketO   -- eine geschweifte Klammer geoeffnet
+             | T_ABracketO   -- eine spitze Klammer geoeffnet
              | T_SBracketC   -- eine eckige Klammer geschlossen
              | T_RBracketC   -- eine runde Klammer geschlossen
              | T_WBracketC   -- eine geschweifte Klammer geschlossen
+             | T_ABracketC   -- eine spitze Klammer geschlossen
              | T_Star Int    -- ein Sternchen
              | T_DDot        -- ein Doppelpunkt
              | T_BSlash      -- ein Backslash
+             | T_ExMark      -- ein Ausrufezeichen
     deriving (Show, Eq)
 
-endChars =" \\*:{[()]}\n"
+endChars =" \\*:<{[()]}>\n"
 
 scan :: String -> Maybe [MDToken]
 -- Rekursionsende
@@ -56,11 +59,14 @@ scan str@(x:xs)
     |x=='['    = maybe Nothing (\tokens -> Just (T_SBracketO:tokens))    $scan xs
     |x=='('    = maybe Nothing (\tokens -> Just (T_RBracketO:tokens))    $scan xs
     |x=='{'    = maybe Nothing (\tokens -> Just (T_WBracketO:tokens))    $scan xs
+    |x=='<'    = maybe Nothing (\tokens -> Just (T_ABracketO:tokens))    $scan xs
     |x==']'    = maybe Nothing (\tokens -> Just (T_SBracketC:tokens))    $scan xs
     |x==')'    = maybe Nothing (\tokens -> Just (T_RBracketC:tokens))    $scan xs
     |x=='}'    = maybe Nothing (\tokens -> Just (T_WBracketC:tokens))    $scan xs
+    |x=='>'    = maybe Nothing (\tokens -> Just (T_ABracketC:tokens))    $scan xs
     |x==':'    = maybe Nothing (\tokens -> Just (T_DDot:tokens))    $scan xs
     |x=='\\'   = maybe Nothing (\tokens -> Just (T_BSlash:tokens))    $scan xs
+    |x=='!'    = maybe Nothing (\tokens -> Just (T_ExMark:tokens))    $scan xs
 
 scan str          =
     let (restOfLine, restOfStr) = span (`notElem` endChars) str
