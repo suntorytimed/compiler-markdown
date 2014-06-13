@@ -20,6 +20,8 @@ generateHTML' (UL lis) = "<ul>\n" ++ concat (map generateHTML' lis) ++ "</ul>\n"
 generateHTML' (LI str) = "<li>" ++ str ++ "</li>\n"
 -- ein Absatz
 generateHTML' (P str)  = "<p>" ++ str ++ "</p>\n"
+-- Code
+generateHTML' (C str) = "<c>" ++ str ++ "</c>"
 -- alles andere (?) wird für den Moment ignoriert
 --generateHTML' _ = ""
 generateHTML' ast = error $ show ast
