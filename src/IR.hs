@@ -9,4 +9,5 @@ data AST = Sequence [AST] -- eine Sequenz von HTML-Elementen
          | EmptyLine      -- eine leere Zeile
          | SL [AST]       -- eine sortierte Liste, in der Liste müssen dann die Listenelemente stehen
          | C String       -- ein Codeblock
+         | DOT            -- ein Punkt
     deriving (Show)

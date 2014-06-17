@@ -21,7 +21,9 @@ generateHTML' (LI str) = "<li>" ++ str ++ "</li>\n"
 -- ein Absatz
 generateHTML' (P str)  = "<p>" ++ str ++ "</p>\n"
 -- Code
-generateHTML' (C str) = "<c>" ++ str ++ "</c>"
+generateHTML' (C str) = "<code>" ++ str ++ "</code>"
+-- Punkt
+generateHTML' (DOT) = "."
 -- alles andere (?) wird für den Moment ignoriert
 --generateHTML' _ = ""
 generateHTML' ast = error $ show ast

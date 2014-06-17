@@ -14,7 +14,9 @@ parse (T_Newline:T_Newline:xs) = maybe Nothing (\(Sequence ast) -> Just $ Sequen
 -- ein einzelnes Leerzeichen ignorieren wir (für den Moment?)
 parse (T_Newline:xs)           = parse xs
 -- einem Header muss ein Text folgen. Das ergibt zusammen einen Header im AST, er wird einer Sequenz hinzugefügt
-parse (T_H i : T_White j : T_Text str: xs) = maybe Nothing (\(Sequence ast) -> Just $ Sequence (H i str:ast)) $ parse xs
+parse (T_H i : T_White j : T_Text str: xs) =
+    let (rest, dot) = span(/=T_Newline) MDToken
+    in maybe Nothing (\(Sequence ast) -> Just $ Sequence (H i str:ast)) $ parse xs
 -- einem listitem-Marker muss auch ein Text folgen. Das gibt zusammen ein Listitem im AST.
 -- es wird mit der Hilfsfunktion addLI eingefügt
 parse (T_ULI i: T_Text str: xs) = maybe Nothing (\ast -> Just $ addULI (LI str) ast) $ parse xs
@@ -25,11 +27,17 @@ parse (T_SLI i: T_Text str: xs) = maybe Nothing (\ast -> Just $ addSLI (LI str) 
 -- Absatz landen, wird die Hilfsfunktion addP genutzt um den Text einzufügen
 parse (T_Text str: xs)         = maybe Nothing (\ast -> Just $ addP (P str) ast) $ parse xs
 -- Codeblock
-parse (T_White 4 : T_Text str: xs) = maybe Nothing (\ast -> Just $ addP (C str) ast) $ parse xs
+parse (T_White i : T_Text str: xs)
+    |i==4   = maybe Nothing (\ast -> Just $ addP (C str) ast) $ parse xs
+-- Newline nach 2 oder mehr Leerzeichen
+parse (T_White i : T_Newline:xs)
+    |i>=2   = maybe Nothing (\ast -> Just $ addP (EmptyLine) ast) $ parse xs
+-- Ein Punkt als Satzzeichen
+parse (T_Dot:xs) = maybe Nothing (\ast -> Just $ addP(DOT) ast) $ parse xs
 -- Der gesamte Rest wird für den Moment ignoriert. Achtung: Der Parser schlägt, in der momentanen Implementierung, nie fehl.
 -- Das kann in der Endfassung natürlich nicht so bleiben!
-parse ts = error $ show ts
---parse _ = Sequence []
+-- parse ts = error $ show ts
+parse _ = Just $ Sequence []
 
 
 -- Hilfsfunktionen für den Parser
