@@ -14,26 +14,44 @@ parse (T_Newline:T_Newline:xs) = maybe Nothing (\(Sequence ast) -> Just $ Sequen
 -- ein einzelnes Leerzeichen ignorieren wir (für den Moment?)
 parse (T_Newline:xs)           = parse xs
 -- einem Header muss ein Text folgen. Das ergibt zusammen einen Header im AST, er wird einer Sequenz hinzugefügt
-parse (T_H i : T_White j : T_Text str: xs) =
-    let (rest, dot) = span(/=T_Newline) MDToken
-    in maybe Nothing (\(Sequence ast) -> Just $ Sequence (H i str:ast)) $ parse xs
+parse (T_H i : xs) =
+    let (content, rest) = span(/=T_Newline) xs
+        in case parse content of
+            Nothing -> Nothing
+            Just contentString -> maybe Nothing (\(Sequence ast) -> Just $ Sequence (H i contentString:ast)) $ parse rest
 -- einem listitem-Marker muss auch ein Text folgen. Das gibt zusammen ein Listitem im AST.
 -- es wird mit der Hilfsfunktion addLI eingefügt
-parse (T_ULI i: T_Text str: xs) = maybe Nothing (\ast -> Just $ addULI (LI str) ast) $ parse xs
+parse (T_ULI i: xs) =
+    let (content, rest) = span(/=T_Newline) xs
+        in case parse content of
+            Nothing -> Nothing
+            Just contentString -> maybe Nothing (\ast -> Just $ addULI (LI contentString) ast) $ parse rest
 -- einem listitem-Marker muss auch ein Text folgen. Das gibt zusammen ein Listitem im AST.
 -- es wird mit der Hilfsfunktion addLI eingefügt
-parse (T_SLI i: T_Text str: xs) = maybe Nothing (\ast -> Just $ addSLI (LI str) ast) $ parse xs
+parse (T_Num i: T_Dot : xs) =
+    let (content, rest) = span(/=T_Newline) xs
+        in case parse content of
+            Nothing -> Nothing
+            Just contentString -> maybe Nothing (\ast -> Just $ addSLI (LI contentString) ast) $ parse rest
 -- ein Text am Anfang gehört in einen Absatz. Damit direkt auf einander folgende Texte in einem gemeinsamen
 -- Absatz landen, wird die Hilfsfunktion addP genutzt um den Text einzufügen
 parse (T_Text str: xs)         = maybe Nothing (\ast -> Just $ addP (P str) ast) $ parse xs
 -- Codeblock
 parse (T_White i : T_Text str: xs)
-    |i==4   = maybe Nothing (\ast -> Just $ addP (C str) ast) $ parse xs
+    |i==4 =
+        let (content, rest) = span(/=T_Newline) xs
+            in case parse content of
+                Nothing -> Nothing
+                Just contentString -> maybe Nothing (\ast -> Just $ addP (C contentString) ast) $ parse rest
 -- Newline nach 2 oder mehr Leerzeichen
 parse (T_White i : T_Newline:xs)
     |i>=2   = maybe Nothing (\ast -> Just $ addP (EmptyLine) ast) $ parse xs
+-- Leerzeichen parsen
+parse (T_White i : xs) = maybe Nothing (\ast -> Just $ addP (P " ") ast) $ parse xs
 -- Ein Punkt als Satzzeichen
-parse (T_Dot:xs) = maybe Nothing (\ast -> Just $ addP(DOT) ast) $ parse xs
+parse (T_Dot : xs) = maybe Nothing (\ast -> Just $ addP (P ".") ast) $ parse xs
+-- Eine Zahl
+parse (T_Num i : xs) = maybe Nothing (\ast -> Just $ addP (P i) ast) $ parse xs
 -- Der gesamte Rest wird für den Moment ignoriert. Achtung: Der Parser schlägt, in der momentanen Implementierung, nie fehl.
 -- Das kann in der Endfassung natürlich nicht so bleiben!
 -- parse ts = error $ show ts
@@ -52,7 +70,7 @@ addULI li (Sequence ast) = Sequence (UL [li] : ast)
 -- Mehrere aufeinander folgende Texte werden zu einem Absatz zusammengefügt.
 addP :: AST -> AST -> AST
 -- Wenn wir zwei Absätze hintereinander finden, fassen wir diese zusammen 
-addP (P str1) (Sequence (P str2 : ast)) = Sequence (P (str1 ++ "\n" ++ str2) : ast)
+addP (P str1) (Sequence (P str2 : ast)) = Sequence (P (str1 ++ str2) : ast)
 -- Andernfalls bleibt der Absatz alleine
 addP p (Sequence ast) = Sequence (p : ast)
 

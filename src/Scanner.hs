@@ -8,7 +8,7 @@ data MDToken = T_Newline     -- '\n'
              | T_ULI Int     -- ein ungeordnetes Listenelement-Marker mit der (Einrückungs-)Ebene
              | T_SLI Int     -- ein geordnetes Listenelement-Marker mit der (Einrückungs-)Ebene
              | T_White Int   -- ein Header mit der Anzahl der Hashes
-             | T_Num Int     -- eine Zahl mit Anzahl an Stellen
+             | T_Num String  -- eine Zahl
              | T_Dot         -- ein Punkt
              | T_SBracketO   -- eine eckige Klammer geoeffnet
              | T_RBracketO   -- eine runde Klammer geoeffnet
@@ -54,7 +54,7 @@ scan str@(x:xs)
     in maybe Nothing (\tokens -> Just (T_Star level:tokens))     $ scan rest
 
     |isDigit x = let (num, rest) = span isDigit str
-                     level = (length num)
+                     level = num
     in maybe Nothing (\tokens -> Just (T_Num level:tokens))       $ scan rest
 
     |x=='\n'   = maybe Nothing (\tokens -> Just (T_Newline:tokens))    $ scan xs
