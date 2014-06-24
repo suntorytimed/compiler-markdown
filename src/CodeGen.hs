@@ -28,6 +28,10 @@ generateHTML' (C ast) = "<code>" ++ generateHTML' ast ++ "</code>\n"
 generateHTML' (DOT) = "."
 -- EmptyLine
 generateHTML' (EmptyLine) = "<br></br>\n"
+-- Link-ID
+generateHTML' (Id ast) = "<a id=\"" ++ generateHTML' ast ++ "\" "
+-- Link
+generateHTML' (Link ast) = "href=\"" ++ generateHTML' ast ++ "\"/>"
 -- alles andere (?) wird für den Moment ignoriert
 generateHTML' (Sequence []) = ""
 generateHTML' ast = error $ show ast
