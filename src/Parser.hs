@@ -21,7 +21,12 @@ parse (T_H i : xs) =
             Just contentString -> maybe Nothing (\(Sequence ast) -> Just $ Sequence (H i contentString:ast)) $ parse rest
 -- einem listitem-Marker muss auch ein Text folgen. Das gibt zusammen ein Listitem im AST.
 -- es wird mit der Hilfsfunktion addLI eingefügt
-parse (T_ULI i: xs) =
+parse (T_Plus : xs) =
+    let (content, rest) = span(/=T_Newline) xs
+        in case parse content of
+            Nothing -> Nothing
+            Just contentString -> maybe Nothing (\ast -> Just $ addULI (LI contentString) ast) $ parse rest
+parse (T_Minus : xs) =
     let (content, rest) = span(/=T_Newline) xs
         in case parse content of
             Nothing -> Nothing
@@ -82,6 +87,8 @@ parse (T_BSlash:x: xs)
     |x == T_Dot = maybe Nothing (\ast -> Just $ addP (P ".") ast) $ parse xs   -- ein Punkt
     |x == T_ExMark = maybe Nothing (\ast -> Just $ addP (P "!") ast) $ parse xs     -- ein Ausrufezeichen
     |x == T_BQuote 1 = maybe Nothing (\ast -> Just $ addP (P "`") ast) $ parse xs -- ein Backquote`
+    |x == T_Plus = maybe Nothing (\ast -> Just $ addP (P "+") ast) $ parse xs -- ein Plus
+    |x == T_Minus = maybe Nothing (\ast -> Just $ addP (P "-") ast) $ parse xs -- ein Minus
 -- Der gesamte Rest wird für den Moment ignoriert. Achtung: Der Parser schlägt, in der momentanen Implementierung, nie fehl.
 -- Das kann in der Endfassung natürlich nicht so bleiben!
 -- parse ts = error $ show ts

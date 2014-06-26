@@ -5,7 +5,6 @@ import Data.Char (isDigit)
 data MDToken = T_Newline     -- '\n' 
              | T_H Int       -- ein Header mit der Anzahl der Hashes
              | T_Text String -- Text, aber immer nur bis zum Zeilenende, Text über mehrere Zeilen muss vom Parser zusammengesetzt werden
-             | T_ULI Int     -- ein ungeordnetes Listenelement-Marker mit der (Einrückungs-)Ebene
              | T_SLI Int     -- ein geordnetes Listenelement-Marker mit der (Einrückungs-)Ebene
              | T_White Int   -- ein Header mit der Anzahl der Hashes
              | T_Num String  -- eine Zahl
@@ -23,6 +22,8 @@ data MDToken = T_Newline     -- '\n'
              | T_BSlash      -- ein Backslash
              | T_ExMark      -- ein Ausrufezeichen
              | T_BQuote Int  -- ein Backquote`
+             | T_Plus        -- ein Plus kann als Listenelement gesehen werden
+             | T_Minus       -- ein Minus kann als Listenelement gesehen werden
     deriving (Show, Eq)
 
 endChars =" \\`*:<{[()]}>.\n"
@@ -58,8 +59,8 @@ scan str@(x:xs)
     in maybe Nothing (\tokens -> Just (T_Num level:tokens))       $ scan rest
 
     |x=='\n'   = maybe Nothing (\tokens -> Just (T_Newline:tokens))    $ scan xs
-    |x=='-'    = maybe Nothing (\tokens -> Just (T_ULI 0:tokens))   $ scan xs
-    |x=='+'    = maybe Nothing (\tokens -> Just (T_ULI 0:tokens))   $ scan xs
+    |x=='-'    = maybe Nothing (\tokens -> Just (T_Minus:tokens))   $ scan xs
+    |x=='+'    = maybe Nothing (\tokens -> Just (T_Plus:tokens))   $ scan xs
     |x=='.'    = maybe Nothing (\tokens -> Just (T_Dot:tokens))    $ scan xs
     |x=='['    = maybe Nothing (\tokens -> Just (T_SBracketO:tokens))    $scan xs
     |x=='('    = maybe Nothing (\tokens -> Just (T_RBracketO:tokens))    $scan xs
