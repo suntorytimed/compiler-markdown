@@ -66,10 +66,22 @@ parse (T_White i : xs) = maybe Nothing (\ast -> Just $ addP (P " ") ast) $ parse
 parse (T_Dot : xs) = maybe Nothing (\ast -> Just $ addP (P ".") ast) $ parse xs
 -- Eine Zahl
 parse (T_Num i : xs) = maybe Nothing (\ast -> Just $ addP (P i) ast) $ parse xs
+-- ein Backslash kann Zeichen escapen
+parse (T_BSlash:x: xs)
+    |x == T_BSlash = maybe Nothing (\ast -> Just $ addP (P "\\") ast) $ parse xs    -- ein Backslash
+    |x == T_SBracketO = maybe Nothing (\ast -> Just $ addP (P "[") ast) $ parse xs  -- eine eckige Klammer geoeffnet
+    |x == T_RBracketO = maybe Nothing (\ast -> Just $ addP (P "(") ast) $ parse xs  -- eine runde Klammer geoeffnet
+    |x == T_WBracketO = maybe Nothing (\ast -> Just $ addP (P "{") ast) $ parse xs  -- eine geschweifte Klammer geoeffnet
+    |x == T_ABracketO = maybe Nothing (\ast -> Just $ addP (P "<") ast) $ parse xs  -- eine spitze Klammer geoeffnet
+    |x == T_SBracketC = maybe Nothing (\ast -> Just $ addP (P "]") ast) $ parse xs  -- eine eckige Klammer geschlossen
+    |x == T_RBracketC = maybe Nothing (\ast -> Just $ addP (P ")") ast) $ parse xs  -- eine runde Klammer geschlossen
+    |x == T_WBracketC = maybe Nothing (\ast -> Just $ addP (P "}") ast) $ parse xs  -- eine geschweifte Klammer geschlossen
+    |x == T_ABracketC = maybe Nothing (\ast -> Just $ addP (P ">") ast) $ parse xs  -- eine spitze Klammer geschlossen
+  --  |x == T_Star Int = maybe Nothing (\ast -> Just $ addP (P "*") ast) $ parse xs   -- ein Sternchen
 -- Der gesamte Rest wird für den Moment ignoriert. Achtung: Der Parser schlägt, in der momentanen Implementierung, nie fehl.
 -- Das kann in der Endfassung natürlich nicht so bleiben!
-parse ts = error $ show ts
--- parse _ = Just $ Sequence []
+-- parse ts = error $ show ts
+parse _ = Just $ Sequence []
 
 
 -- Hilfsfunktionen für den Parser
