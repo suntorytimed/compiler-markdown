@@ -18,7 +18,7 @@
 -
 [test link](http://www.google.de/)
 
-########## und trotz vieler ()  vieler Hashes "nur" H6
+########## und trotz vieler \(\)  vieler Hashes "nur" H6
 
 Hier  steht einfach\
 nur Text.

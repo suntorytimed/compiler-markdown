@@ -91,8 +91,8 @@ parse (T_BSlash:x: xs)
     |x == T_Minus = maybe Nothing (\ast -> Just $ addP (P "-") ast) $ parse xs -- ein Minus
 -- Der gesamte Rest wird für den Moment ignoriert. Achtung: Der Parser schlägt, in der momentanen Implementierung, nie fehl.
 -- Das kann in der Endfassung natürlich nicht so bleiben!
--- parse ts = error $ show ts
-parse _ = Just $ Sequence []
+parse ts = error $ show ts
+-- parse _ = Just $ Sequence []
 
 
 -- Hilfsfunktionen für den Parser
