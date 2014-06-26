@@ -8,7 +8,7 @@ import           Scanner
 -- Der Parser versucht aus einer Liste von MDToken einen AST zu erzeugen 
 parse :: [MDToken] -> Maybe AST
 -- Die leere Liste ergibt eine leere Sequenz
-parse []                       = Just $ Sequence []
+parse [] = Just $ Sequence []
 -- Zwei Zeilenumbrüche hintereinander sind eine leere Zeile, die in eine Sequenz eingeführt wird (wirklich immer?)
 parse (T_Newline:T_Newline:xs) = maybe Nothing (\(Sequence ast) -> Just $ Sequence (EmptyLine : ast)) $ parse xs
 -- ein einzelnes Leerzeichen ignorieren wir (für den Moment?)
@@ -77,7 +77,11 @@ parse (T_BSlash:x: xs)
     |x == T_RBracketC = maybe Nothing (\ast -> Just $ addP (P ")") ast) $ parse xs  -- eine runde Klammer geschlossen
     |x == T_WBracketC = maybe Nothing (\ast -> Just $ addP (P "}") ast) $ parse xs  -- eine geschweifte Klammer geschlossen
     |x == T_ABracketC = maybe Nothing (\ast -> Just $ addP (P ">") ast) $ parse xs  -- eine spitze Klammer geschlossen
-  --  |x == T_Star Int = maybe Nothing (\ast -> Just $ addP (P "*") ast) $ parse xs   -- ein Sternchen
+    |x == T_Star 1 = maybe Nothing (\ast -> Just $ addP (P "*") ast) $ parse xs   -- ein Sternchen
+    |x == T_H 1 = maybe Nothing (\ast -> Just $ addP (P "#") ast) $ parse xs   -- ein Hash
+    |x == T_Dot = maybe Nothing (\ast -> Just $ addP (P ".") ast) $ parse xs   -- ein Punkt
+    |x == T_ExMark = maybe Nothing (\ast -> Just $ addP (P "!") ast) $ parse xs     -- ein Ausrufezeichen
+    |x == T_BQuote 1 = maybe Nothing (\ast -> Just $ addP (P "`") ast) $ parse xs -- ein Backquote`
 -- Der gesamte Rest wird für den Moment ignoriert. Achtung: Der Parser schlägt, in der momentanen Implementierung, nie fehl.
 -- Das kann in der Endfassung natürlich nicht so bleiben!
 -- parse ts = error $ show ts
