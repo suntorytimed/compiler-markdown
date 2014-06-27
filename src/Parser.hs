@@ -55,8 +55,10 @@ parse (T_RBracketO: xs) =
         in case parse content of
             Nothing -> Nothing
             Just contentString -> maybe Nothing (\ast -> Just $ addP (Link contentString) ast) $ parse rest
--- B
-parse (T_Dot : xs) = maybe Nothing (\ast -> Just $ addP (P ".") ast) $ parse xs
+-- Square Bracket ignorieren
+parse (T_SBracketC : xs) = maybe Nothing (\ast -> Just $ addP (P "") ast) $ parse xs
+-- Round Bracket ignorieren
+parse (T_RBracketC : xs) = maybe Nothing (\ast -> Just $ addP (P "") ast) $ parse xs
 -- Newline nach 2 oder mehr Leerzeichen
 parse (T_White i : T_Newline:xs)
     |i>=2   = maybe Nothing (\ast -> Just $ addP (EmptyLine) ast) $ parse xs
@@ -68,8 +70,8 @@ parse (T_Dot : xs) = maybe Nothing (\ast -> Just $ addP (P ".") ast) $ parse xs
 parse (T_Num i : xs) = maybe Nothing (\ast -> Just $ addP (P i) ast) $ parse xs
 -- Der gesamte Rest wird für den Moment ignoriert. Achtung: Der Parser schlägt, in der momentanen Implementierung, nie fehl.
 -- Das kann in der Endfassung natürlich nicht so bleiben!
-parse ts = error $ show ts
--- parse _ = Just $ Sequence []
+-- parse ts = error $ show ts
+parse _ = Just $ Sequence []
 
 
 -- Hilfsfunktionen für den Parser
