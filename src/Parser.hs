@@ -91,6 +91,14 @@ parse (T_BSlash:x: xs)
     |x == T_BQuote 1 = maybe Nothing (\ast -> Just $ addP (P "`") ast) $ parse xs -- ein Backquote`
     |x == T_Plus = maybe Nothing (\ast -> Just $ addP (P "+") ast) $ parse xs -- ein Plus
     |x == T_Minus = maybe Nothing (\ast -> Just $ addP (P "-") ast) $ parse xs -- ein Minus
+-- ein automatischer Link wird eingefügt bzw. erst mal ignoriert
+parse (T_ABracketO : xs) =
+    let (content, rest) = span(/=T_ABracketC) xs
+        in case parse content of
+            Nothing -> Nothing
+            Just contentString -> maybe Nothing (\ast -> Just $ addP (Id contentString) ast) $ parse rest
+            --Just contentString -> maybe Nothing (\ast -> Just $ addLink (Id contentString, Link contentString) ast) $ parse rest
+            
 -- Der gesamte Rest wird für den Moment ignoriert. Achtung: Der Parser schlägt, in der momentanen Implementierung, nie fehl.
 -- Das kann in der Endfassung natürlich nicht so bleiben!
 -- parse ts = error $ show ts
@@ -119,3 +127,8 @@ addSLI :: AST -> AST -> AST
 addSLI li (Sequence (SL lis : ast)) = Sequence (SL (li:lis) : ast)
 -- Andernfalls erzeugen wir eine neue SL.
 addSLI li (Sequence ast) = Sequence (SL [li] : ast)
+
+-- Einfügen eines Links
+--addLink :: AST -> AST -> AST
+-- Wir erzeugen einen neuen Link.
+--addLink (Id id, Link link) (Sequence ast) = Sequence (Id id : Link link : ast)
