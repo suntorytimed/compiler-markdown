@@ -134,12 +134,13 @@ addSLI li (Sequence (SL lis : ast)) = Sequence (SL (li:lis) : ast)
 -- Andernfalls erzeugen wir eine neue SL.
 addSLI li (Sequence ast) = Sequence (SL [li] : ast)
 
+-- Einfügen eines normalen Links erfordert sowohl addID als auch addLink
 addLink :: AST -> AST -> AST
 addLink (Link link) (Sequence ast) = Sequence (Link link : ast)
 addID :: AST -> AST -> AST
 addID (Id id) (Sequence ast) = Sequence (Id id : ast)
 
--- Einfügen eines Links
+-- Einfügen eines automatischen Links
 addLi :: (AST,AST) -> AST -> AST
 -- Wir erzeugen einen neuen Link.
 addLi (Id id,Link link) (Sequence ast) = Sequence (Id id : Link link : ast)
