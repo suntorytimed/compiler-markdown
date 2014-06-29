@@ -69,8 +69,6 @@ parse (T_ABracketO : xs) =
             Nothing -> Nothing
             -- eine addLink-Funktion mit zwei Paraemetern ist besser
             Just contentString -> maybe Nothing (\ast -> Just $ addLi (Id contentString, Link contentString) ast) $ parse rest
-            -- bei dieser Funktion stimmt die Ausgabe nicht, da der Link in zwei <a und id und href eingebettet wird!!!
-            --Just contentString -> maybe Nothing (\ast -> Just $ addId (Id contentString) $ addLink (Link contentString) ast) $ parse rest
 -- Square Bracket ignorieren
 parse (T_SBracketC : xs) = maybe Nothing (\ast -> Just $ addP (P "") ast) $ parse xs
 -- Round Bracket ignorieren
@@ -136,17 +134,7 @@ addSLI li (Sequence (SL lis : ast)) = Sequence (SL (li:lis) : ast)
 -- Andernfalls erzeugen wir eine neue SL.
 addSLI li (Sequence ast) = Sequence (SL [li] : ast)
 
-
--- Einfügen einer Id
---addId :: AST -> AST -> AST
--- Wir erzeugen einen neuen Link.
---addId id (Sequence ast) = Sequence (Id id : ast)
 -- Einfügen eines Links
---addLink :: AST -> AST -> AST
--- Wir erzeugen einen neuen Link.
---addLink link (Sequence ast) = Sequence (Link link : ast)
-
--- Einfügen eines Links schoenere Variante
 addLi :: (AST,AST) -> AST -> AST
 -- Wir erzeugen einen neuen Link.
 addLi (id,link) (Sequence ast) = Sequence (Id id : Link link : ast)
