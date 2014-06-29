@@ -54,14 +54,12 @@ parse (T_SBracketO: xs) =
         in case parse content of
             Nothing -> Nothing
             Just contentString -> maybe Nothing (\ast -> Just $ addID (Id contentString) ast) $ parse rest
-            --Just contentString -> maybe Nothing (\ast -> Just $ addLi (Id contentString, Link contentString) ast) $ parse rest
 -- link
 parse (T_RBracketO: xs) =
     let (content, rest) = span(/=T_RBracketC) xs
         in case parse content of
             Nothing -> Nothing
             Just contentString -> maybe Nothing (\ast -> Just $ addLink (Link contentString) ast) $ parse rest
-            --Just contentString -> maybe Nothing (\ast -> Just $ addLi (Id contentString, Link contentString) ast) $ parse rest
 -- ein automatischer Link wird eingefügt
 parse (T_ABracketO : xs) =
     let (content, rest) = span(/=T_ABracketC) xs

@@ -31,9 +31,9 @@ generateHTML' (DDot) = ":"
 -- EmptyLine
 generateHTML' (EmptyLine) = "<br></br>\n"
 -- Link-ID
-generateHTML' (Id ast) = "<a id=\"" ++ generateHTML' ast ++ "\" "
+generateHTML' (Id ast) = generateHTML' ast ++ "\"</a> "
 -- Link
-generateHTML' (Link ast) = "href=\"" ++ generateHTML' ast ++ "\"/>"
+generateHTML' (Link ast) = "<a href=\"" ++ generateHTML' ast ++ "\">"
 -- alles andere (?) wird für den Moment ignoriert
 generateHTML' (Sequence []) = ""
 generateHTML' ast = error $ show ast
