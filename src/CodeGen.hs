@@ -31,7 +31,7 @@ generateHTML' (DDot) = ":"
 -- EmptyLine
 generateHTML' (EmptyLine) = "<br></br>\n"
 -- Link-ID
-generateHTML' (Id ast) = generateHTML' ast ++ "\"</a> "
+generateHTML' (Id ast) = generateHTML' ast ++ "</a> "
 -- Link
 generateHTML' (Link ast) = "<a href=\"" ++ generateHTML' ast ++ "\">"
 -- alles andere (?) wird für den Moment ignoriert
