@@ -141,4 +141,4 @@ addID (Id id) (Sequence ast) = Sequence (Id id : ast)
 -- Einfügen eines automatischen Links
 addLi :: (AST,AST) -> AST -> AST
 -- Wir erzeugen einen neuen Link.
-addLi (Id id,Link link) (Sequence ast) = Sequence (Id id : Link link : ast)
+addLi (Id id,Link link) (Sequence ast) = Sequence (Link link: Id id : ast)
