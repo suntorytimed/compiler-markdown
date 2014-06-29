@@ -137,4 +137,4 @@ addSLI li (Sequence ast) = Sequence (SL [li] : ast)
 -- Einfügen eines Links
 addLi :: (AST,AST) -> AST -> AST
 -- Wir erzeugen einen neuen Link.
-addLi (id,link) (Sequence ast) = Sequence (Id id : Link link : ast)
+addLi (Id id,Link link) (Sequence ast) = Sequence (Id id : Link link : ast)
