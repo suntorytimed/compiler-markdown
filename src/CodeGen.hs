@@ -26,6 +26,8 @@ generateHTML' (P str)  = "<p>" ++ str ++ "</p>"
 generateHTML' (C ast) = "<code>" ++ generateHTML' ast ++ "</code>\n"
 -- Punkt
 generateHTML' (DOT) = "."
+-- Doppelpunkt
+generateHTML' (DDot) = ":"
 -- EmptyLine
 generateHTML' (EmptyLine) = "<br></br>\n"
 -- Link-ID

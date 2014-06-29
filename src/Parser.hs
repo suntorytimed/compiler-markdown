@@ -53,13 +53,15 @@ parse (T_SBracketO: xs) =
     let (content, rest) = span(/=T_SBracketC) xs
         in case parse content of
             Nothing -> Nothing
-            Just contentString -> maybe Nothing (\ast -> Just $ addP (Id contentString) ast) $ parse rest
+            --Just contentString -> maybe Nothing (\ast -> Just $ addP (Id contentString) ast) $ parse rest
+            Just contentString -> maybe Nothing (\ast -> Just $ addLi (Id contentString, Link contentString) ast) $ parse rest
 -- link
 parse (T_RBracketO: xs) =
     let (content, rest) = span(/=T_RBracketC) xs
         in case parse content of
             Nothing -> Nothing
-            Just contentString -> maybe Nothing (\ast -> Just $ addP (Link contentString) ast) $ parse rest
+            --Just contentString -> maybe Nothing (\ast -> Just $ addP (Link contentString) ast) $ parse rest
+            Just contentString -> maybe Nothing (\ast -> Just $ addLi (Id contentString, Link contentString) ast) $ parse rest
 -- Square Bracket ignorieren
 parse (T_SBracketC : xs) = maybe Nothing (\ast -> Just $ addP (P "") ast) $ parse xs
 -- Round Bracket ignorieren
@@ -71,6 +73,8 @@ parse (T_White i : T_Newline:xs)
 parse (T_White i : xs) = maybe Nothing (\ast -> Just $ addP (P " ") ast) $ parse xs
 -- Ein Punkt als Satzzeichen
 parse (T_Dot : xs) = maybe Nothing (\ast -> Just $ addP (P ".") ast) $ parse xs
+-- Ein Doppelpunkt als Satzzeichen
+parse (T_DDot : xs) = maybe Nothing (\ast -> Just $ addP (P ":") ast) $ parse xs
 -- Eine Zahl
 parse (T_Num i : xs) = maybe Nothing (\ast -> Just $ addP (P i) ast) $ parse xs
 -- ein Backslash kann Zeichen escapen
@@ -91,17 +95,19 @@ parse (T_BSlash:x: xs)
     |x == T_BQuote 1 = maybe Nothing (\ast -> Just $ addP (P "`") ast) $ parse xs -- ein Backquote`
     |x == T_Plus = maybe Nothing (\ast -> Just $ addP (P "+") ast) $ parse xs -- ein Plus
     |x == T_Minus = maybe Nothing (\ast -> Just $ addP (P "-") ast) $ parse xs -- ein Minus
--- ein automatischer Link wird eingefügt bzw. erst mal ignoriert
+-- ein automatischer Link wird eingefügt
 parse (T_ABracketO : xs) =
     let (content, rest) = span(/=T_ABracketC) xs
         in case parse content of
             Nothing -> Nothing
-            Just contentString -> maybe Nothing (\ast -> Just $ addP (Id contentString) ast) $ parse rest
-            --Just contentString -> maybe Nothing (\ast -> Just $ addLink (Id contentString, Link contentString) ast) $ parse rest
+            -- eine addLink-Funktion mit zwei Paraemetern ist besser
+            Just contentString -> maybe Nothing (\ast -> Just $ addLi (Id contentString, Link contentString) ast) $ parse rest
+            -- bei dieser Funktion stimmt die Ausgabe nicht, da der Link in zwei <a und id und href eingebettet wird!!!
+            --Just contentString -> maybe Nothing (\ast -> Just $ addId (Id contentString) $ addLink (Link contentString) ast) $ parse rest
             
 -- Der gesamte Rest wird für den Moment ignoriert. Achtung: Der Parser schlägt, in der momentanen Implementierung, nie fehl.
 -- Das kann in der Endfassung natürlich nicht so bleiben!
--- parse ts = error $ show ts
+--parse ts = error $ show ts
 parse _ = Just $ Sequence []
 
 
@@ -128,7 +134,17 @@ addSLI li (Sequence (SL lis : ast)) = Sequence (SL (li:lis) : ast)
 -- Andernfalls erzeugen wir eine neue SL.
 addSLI li (Sequence ast) = Sequence (SL [li] : ast)
 
+
+-- Einfügen einer Id
+--addId :: AST -> AST -> AST
+-- Wir erzeugen einen neuen Link.
+--addId id (Sequence ast) = Sequence (Id id : ast)
 -- Einfügen eines Links
 --addLink :: AST -> AST -> AST
 -- Wir erzeugen einen neuen Link.
---addLink (Id id, Link link) (Sequence ast) = Sequence (Id id : Link link : ast)
+--addLink link (Sequence ast) = Sequence (Link link : ast)
+
+-- Einfügen eines Links schoenere Variante
+addLi :: (AST,AST) -> AST -> AST
+-- Wir erzeugen einen neuen Link.
+addLi (id,link) (Sequence ast) = Sequence (Id id : Link link : ast)

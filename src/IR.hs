@@ -12,4 +12,5 @@ data AST = Sequence [AST] -- eine Sequenz von HTML-Elementen
          | DOT            -- ein Punkt
          | Id AST         -- eine Link ID
          | Link AST       -- der Link
+         | DDot           -- ein Doppelpunkt
     deriving (Show)
