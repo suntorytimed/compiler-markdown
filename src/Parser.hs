@@ -62,10 +62,21 @@ parse (T_RBracketO: xs) =
             Nothing -> Nothing
             --Just contentString -> maybe Nothing (\ast -> Just $ addP (Link contentString) ast) $ parse rest
             Just contentString -> maybe Nothing (\ast -> Just $ addLi (Id contentString, Link contentString) ast) $ parse rest
+-- ein automatischer Link wird eingefügt
+parse (T_ABracketO : xs) =
+    let (content, rest) = span(/=T_ABracketC) xs
+        in case parse content of
+            Nothing -> Nothing
+            -- eine addLink-Funktion mit zwei Paraemetern ist besser
+            Just contentString -> maybe Nothing (\ast -> Just $ addLi (Id contentString, Link contentString) ast) $ parse rest
+            -- bei dieser Funktion stimmt die Ausgabe nicht, da der Link in zwei <a und id und href eingebettet wird!!!
+            --Just contentString -> maybe Nothing (\ast -> Just $ addId (Id contentString) $ addLink (Link contentString) ast) $ parse rest
 -- Square Bracket ignorieren
 parse (T_SBracketC : xs) = maybe Nothing (\ast -> Just $ addP (P "") ast) $ parse xs
 -- Round Bracket ignorieren
 parse (T_RBracketC : xs) = maybe Nothing (\ast -> Just $ addP (P "") ast) $ parse xs
+-- Spitze Klammer ignorieren
+parse (T_ABracketC : xs) = maybe Nothing (\ast -> Just $ addP (P "") ast) $ parse xs
 -- Newline nach 2 oder mehr Leerzeichen
 parse (T_White i : T_Newline:xs)
     |i>=2   = maybe Nothing (\ast -> Just $ addP (EmptyLine) ast) $ parse xs
@@ -95,20 +106,11 @@ parse (T_BSlash:x: xs)
     |x == T_BQuote 1 = maybe Nothing (\ast -> Just $ addP (P "`") ast) $ parse xs -- ein Backquote`
     |x == T_Plus = maybe Nothing (\ast -> Just $ addP (P "+") ast) $ parse xs -- ein Plus
     |x == T_Minus = maybe Nothing (\ast -> Just $ addP (P "-") ast) $ parse xs -- ein Minus
--- ein automatischer Link wird eingefügt
-parse (T_ABracketO : xs) =
-    let (content, rest) = span(/=T_ABracketC) xs
-        in case parse content of
-            Nothing -> Nothing
-            -- eine addLink-Funktion mit zwei Paraemetern ist besser
-            Just contentString -> maybe Nothing (\ast -> Just $ addLi (Id contentString, Link contentString) ast) $ parse rest
-            -- bei dieser Funktion stimmt die Ausgabe nicht, da der Link in zwei <a und id und href eingebettet wird!!!
-            --Just contentString -> maybe Nothing (\ast -> Just $ addId (Id contentString) $ addLink (Link contentString) ast) $ parse rest
-            
+
 -- Der gesamte Rest wird für den Moment ignoriert. Achtung: Der Parser schlägt, in der momentanen Implementierung, nie fehl.
 -- Das kann in der Endfassung natürlich nicht so bleiben!
---parse ts = error $ show ts
-parse _ = Just $ Sequence []
+parse ts = error $ show ts
+--parse _ = Just $ Sequence []
 
 
 -- Hilfsfunktionen für den Parser
