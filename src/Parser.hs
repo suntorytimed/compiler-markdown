@@ -53,15 +53,15 @@ parse (T_SBracketO: xs) =
     let (content, rest) = span(/=T_SBracketC) xs
         in case parse content of
             Nothing -> Nothing
-            --Just contentString -> maybe Nothing (\ast -> Just $ addP (Id contentString) ast) $ parse rest
-            Just contentString -> maybe Nothing (\ast -> Just $ addLi (Id contentString, Link contentString) ast) $ parse rest
+            Just contentString -> maybe Nothing (\ast -> Just $ addID (Id contentString) ast) $ parse rest
+            --Just contentString -> maybe Nothing (\ast -> Just $ addLi (Id contentString, Link contentString) ast) $ parse rest
 -- link
 parse (T_RBracketO: xs) =
     let (content, rest) = span(/=T_RBracketC) xs
         in case parse content of
             Nothing -> Nothing
-            --Just contentString -> maybe Nothing (\ast -> Just $ addP (Link contentString) ast) $ parse rest
-            Just contentString -> maybe Nothing (\ast -> Just $ addLi (Id contentString, Link contentString) ast) $ parse rest
+            Just contentString -> maybe Nothing (\ast -> Just $ addLink (Link contentString) ast) $ parse rest
+            --Just contentString -> maybe Nothing (\ast -> Just $ addLi (Id contentString, Link contentString) ast) $ parse rest
 -- ein automatischer Link wird eingefügt
 parse (T_ABracketO : xs) =
     let (content, rest) = span(/=T_ABracketC) xs
@@ -133,6 +133,11 @@ addSLI :: AST -> AST -> AST
 addSLI li (Sequence (SL lis : ast)) = Sequence (SL (li:lis) : ast)
 -- Andernfalls erzeugen wir eine neue SL.
 addSLI li (Sequence ast) = Sequence (SL [li] : ast)
+
+addLink :: AST -> AST -> AST
+addLink (Link link) (Sequence ast) = Sequence (Link link : ast)
+addID :: AST -> AST -> AST
+addID (Id id) (Sequence ast) = Sequence (Id id : ast)
 
 -- Einfügen eines Links
 addLi :: (AST,AST) -> AST -> AST
