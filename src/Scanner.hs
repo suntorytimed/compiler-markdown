@@ -41,17 +41,17 @@ scan str@(x:xs)
 
     -- String aufteilen in Whitespaces und Rest
     |x == ' ' = let (whitespace, rest) = span (==' ') str
-                    level = (length whitespace)
+                    level = length whitespace
     in maybe Nothing (\tokens -> Just (T_White level:tokens))     $ scan rest
 
     |x == '*' = let (star, rest) = span (=='*') str
                     -- Anzahl der Whitespaces ist egal, es wird immer nur eine Newline eingefuegt
-                    level = (length star)
+                    level = length star
     in maybe Nothing (\tokens -> Just (T_Star level:tokens))     $ scan rest
 
     |x == '`' = let (bq, rest) = span (=='`') str
                     -- Anzahl der Backquotes ist egal, es wird immer nur eine Newline eingefuegt
-                    level = (length bq)
+                    level = length bq
     in maybe Nothing (\tokens -> Just (T_Star level:tokens))     $ scan rest
 
     |isDigit x = let (num, rest) = span isDigit str

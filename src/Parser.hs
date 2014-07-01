@@ -25,90 +25,90 @@ parse (T_Plus : xs) =
     let (content, rest) = span(/=T_Newline) xs
         in case parse content of
             Nothing -> Nothing
-            Just contentString -> maybe Nothing (\ast -> Just $ addULI (LI contentString) ast) $ parse rest
+            Just contentString -> fmap (addULI (LI contentString)) $ parse rest
 parse (T_Minus : xs) =
     let (content, rest) = span(/=T_Newline) xs
         in case parse content of
             Nothing -> Nothing
-            Just contentString -> maybe Nothing (\ast -> Just $ addULI (LI contentString) ast) $ parse rest
+            Just contentString -> fmap (addULI (LI contentString)) $ parse rest
 -- einem listitem-Marker muss auch ein Text folgen. Das gibt zusammen ein Listitem im AST.
 -- es wird mit der Hilfsfunktion addLI eingefügt
 parse (T_Num i: T_Dot : xs) =
     let (content, rest) = span(/=T_Newline) xs
         in case parse content of
             Nothing -> Nothing
-            Just contentString -> maybe Nothing (\ast -> Just $ addSLI (LI contentString) ast) $ parse rest
+            Just contentString -> fmap (addSLI (LI contentString)) $ parse rest
 -- ein Text am Anfang gehört in einen Absatz. Damit direkt auf einander folgende Texte in einem gemeinsamen
 -- Absatz landen, wird die Hilfsfunktion addP genutzt um den Text einzufügen
-parse (T_Text str: xs)         = maybe Nothing (\ast -> Just $ addP (P str) ast) $ parse xs
+parse (T_Text str: xs)         = fmap (addP (P str)) $ parse xs
 -- Codeblock
 parse (T_White i : T_Text str: xs)
     |i==4 =
         let (content, rest) = span(/=T_Newline) xs
             in case parse content of
                 Nothing -> Nothing
-                Just contentString -> maybe Nothing (\ast -> Just $ addP (C str contentString) ast) $ parse rest
+                Just contentString -> fmap (addP (C str contentString)) $ parse rest
 -- Fettdruck
 parse (T_Star i : T_Text str: xs) =
     let (content, rest) = span(/=T_Star i) xs
         in case parse content of
             Nothing -> Nothing
-            Just contentString -> maybe Nothing (\ast -> Just $ addP (Bold str contentString) ast) $ parse rest
-parse (T_Star i : xs) = maybe Nothing (\ast -> Just $ addP (P "") ast) $ parse xs
+            Just contentString ->fmap (addP (Bold str contentString)) $ parse rest
+parse (T_Star i : xs) = fmap (addP (P "")) $ parse xs
 -- href
 parse (T_SBracketO: xs) =
     let (content, rest) = span(/=T_SBracketC) xs
         in case parse content of
             Nothing -> Nothing
-            Just contentString -> maybe Nothing (\ast -> Just $ addID (Id contentString) ast) $ parse rest
+            Just contentString -> fmap (addID (Id contentString)) $ parse rest
 -- link
 parse (T_RBracketO: xs) =
     let (content, rest) = span(/=T_RBracketC) xs
         in case parse content of
             Nothing -> Nothing
-            Just contentString -> maybe Nothing (\ast -> Just $ addLink (Link contentString) ast) $ parse rest
+            Just contentString -> fmap (addLink (Link contentString)) $ parse rest
 -- ein automatischer Link wird eingefügt
 parse (T_ABracketO : xs) =
     let (content, rest) = span(/=T_ABracketC) xs
         in case parse content of
             Nothing -> Nothing
             -- eine addLink-Funktion mit zwei Paraemetern ist besser
-            Just contentString -> maybe Nothing (\ast -> Just $ addLi (Id contentString, Link contentString) ast) $ parse rest
+            Just contentString -> fmap (addLi (Id contentString, Link contentString)) $ parse rest
 -- Square Bracket ignorieren
-parse (T_SBracketC : xs) = maybe Nothing (\ast -> Just $ addP (P "") ast) $ parse xs
+parse (T_SBracketC : xs) = fmap (addP (P "")) $ parse xs
 -- Round Bracket ignorieren
-parse (T_RBracketC : xs) = maybe Nothing (\ast -> Just $ addP (P "") ast) $ parse xs
+parse (T_RBracketC : xs) = fmap (addP (P "")) $ parse xs
 -- Spitze Klammer ignorieren
-parse (T_ABracketC : xs) = maybe Nothing (\ast -> Just $ addP (P "") ast) $ parse xs
+parse (T_ABracketC : xs) = fmap (addP (P "")) $ parse xs
 -- Newline nach 2 oder mehr Leerzeichen
 parse (T_White i : T_Newline:xs)
-    |i>=2   = maybe Nothing (\ast -> Just $ addP (EmptyLine) ast) $ parse xs
+    |i>=2   = fmap (addP EmptyLine) $ parse xs
 -- Leerzeichen parsen
-parse (T_White i : xs) = maybe Nothing (\ast -> Just $ addP (P " ") ast) $ parse xs
+parse (T_White i : xs) = fmap (addP (P " ")) $ parse xs
 -- Ein Punkt als Satzzeichen
-parse (T_Dot : xs) = maybe Nothing (\ast -> Just $ addP (P ".") ast) $ parse xs
+parse (T_Dot : xs) = fmap (addP (P ".")) $ parse xs
 -- Ein Doppelpunkt als Satzzeichen
-parse (T_DDot : xs) = maybe Nothing (\ast -> Just $ addP (P ":") ast) $ parse xs
+parse (T_DDot : xs) = fmap (addP (P ":")) $ parse xs
 -- Eine Zahl
-parse (T_Num i : xs) = maybe Nothing (\ast -> Just $ addP (P i) ast) $ parse xs
+parse (T_Num i : xs) = fmap (addP (P i)) $ parse xs
 -- ein Backslash kann Zeichen escapen
 parse (T_BSlash:x: xs)
-    |x == T_BSlash = maybe Nothing (\ast -> Just $ addP (P "\\") ast) $ parse xs    -- ein Backslash
-    |x == T_SBracketO = maybe Nothing (\ast -> Just $ addP (P "[") ast) $ parse xs  -- eine eckige Klammer geoeffnet
-    |x == T_RBracketO = maybe Nothing (\ast -> Just $ addP (P "(") ast) $ parse xs  -- eine runde Klammer geoeffnet
-    |x == T_WBracketO = maybe Nothing (\ast -> Just $ addP (P "{") ast) $ parse xs  -- eine geschweifte Klammer geoeffnet
-    |x == T_ABracketO = maybe Nothing (\ast -> Just $ addP (P "<") ast) $ parse xs  -- eine spitze Klammer geoeffnet
-    |x == T_SBracketC = maybe Nothing (\ast -> Just $ addP (P "]") ast) $ parse xs  -- eine eckige Klammer geschlossen
-    |x == T_RBracketC = maybe Nothing (\ast -> Just $ addP (P ")") ast) $ parse xs  -- eine runde Klammer geschlossen
-    |x == T_WBracketC = maybe Nothing (\ast -> Just $ addP (P "}") ast) $ parse xs  -- eine geschweifte Klammer geschlossen
-    |x == T_ABracketC = maybe Nothing (\ast -> Just $ addP (P ">") ast) $ parse xs  -- eine spitze Klammer geschlossen
-    |x == T_Star 1 = maybe Nothing (\ast -> Just $ addP (P "*") ast) $ parse xs   -- ein Sternchen
-    |x == T_H 1 = maybe Nothing (\ast -> Just $ addP (P "#") ast) $ parse xs   -- ein Hash
-    |x == T_Dot = maybe Nothing (\ast -> Just $ addP (P ".") ast) $ parse xs   -- ein Punkt
-    |x == T_ExMark = maybe Nothing (\ast -> Just $ addP (P "!") ast) $ parse xs     -- ein Ausrufezeichen
-    |x == T_BQuote 1 = maybe Nothing (\ast -> Just $ addP (P "`") ast) $ parse xs -- ein Backquote`
-    |x == T_Plus = maybe Nothing (\ast -> Just $ addP (P "+") ast) $ parse xs -- ein Plus
-    |x == T_Minus = maybe Nothing (\ast -> Just $ addP (P "-") ast) $ parse xs -- ein Minus
+    |x == T_BSlash = fmap (addP (P "\\")) $ parse xs    -- ein Backslash
+    |x == T_SBracketO = fmap (addP (P "[")) $ parse xs  -- eine eckige Klammer geoeffnet
+    |x == T_RBracketO = fmap (addP (P "(")) $ parse xs  -- eine runde Klammer geoeffnet
+    |x == T_WBracketO = fmap (addP (P "{")) $ parse xs  -- eine geschweifte Klammer geoeffnet
+    |x == T_ABracketO = fmap (addP (P "<")) $ parse xs  -- eine spitze Klammer geoeffnet
+    |x == T_SBracketC = fmap (addP (P "]")) $ parse xs  -- eine eckige Klammer geschlossen
+    |x == T_RBracketC = fmap (addP (P ")")) $ parse xs  -- eine runde Klammer geschlossen
+    |x == T_WBracketC = fmap (addP (P "}")) $ parse xs  -- eine geschweifte Klammer geschlossen
+    |x == T_ABracketC = fmap (addP (P ">")) $ parse xs  -- eine spitze Klammer geschlossen
+    |x == T_Star 1 = fmap (addP (P "*")) $ parse xs   -- ein Sternchen
+    |x == T_H 1 = fmap (addP (P "#")) $ parse xs   -- ein Hash
+    |x == T_Dot = fmap (addP (P ".")) $ parse xs   -- ein Punkt
+    |x == T_ExMark = fmap (addP (P "!")) $ parse xs     -- ein Ausrufezeichen
+    |x == T_BQuote 1 = fmap (addP (P "`")) $ parse xs -- ein Backquote`
+    |x == T_Plus = fmap (addP (P "+")) $ parse xs -- ein Plus
+    |x == T_Minus = fmap (addP (P "-")) $ parse xs -- ein Minus
 
 -- Der gesamte Rest wird für den Moment ignoriert. Achtung: Der Parser schlägt, in der momentanen Implementierung, nie fehl.
 -- Das kann in der Endfassung natürlich nicht so bleiben!
