@@ -47,7 +47,14 @@ parse (T_White i : T_Text str: xs)
         let (content, rest) = span(/=T_Newline) xs
             in case parse content of
                 Nothing -> Nothing
-                Just contentString -> maybe Nothing (\ast -> Just $ addP (C contentString) ast) $ parse rest
+                Just contentString -> maybe Nothing (\ast -> Just $ addP (C str contentString) ast) $ parse rest
+-- Fettdruck
+parse (T_Star i : T_Text str: xs) =
+    let (content, rest) = span(/=T_Star i) xs
+        in case parse content of
+            Nothing -> Nothing
+            Just contentString -> maybe Nothing (\ast -> Just $ addP (Bold str contentString) ast) $ parse rest
+parse (T_Star i : xs) = maybe Nothing (\ast -> Just $ addP (P "") ast) $ parse xs
 -- href
 parse (T_SBracketO: xs) =
     let (content, rest) = span(/=T_SBracketC) xs
@@ -106,7 +113,7 @@ parse (T_BSlash:x: xs)
 -- Der gesamte Rest wird für den Moment ignoriert. Achtung: Der Parser schlägt, in der momentanen Implementierung, nie fehl.
 -- Das kann in der Endfassung natürlich nicht so bleiben!
 parse ts = error $ show ts
---parse _ = Just $ Sequence []
+-- parse _ = Just $ Sequence []
 
 
 -- Hilfsfunktionen für den Parser

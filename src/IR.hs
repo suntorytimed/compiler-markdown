@@ -7,10 +7,11 @@ data AST = Sequence [AST] -- eine Sequenz von HTML-Elementen
          | LI AST         -- ein Listenelement mit dem Inhalt
          | P String       -- ein Absatz mit dem Inhalt
          | EmptyLine      -- eine leere Zeile
-         | C AST          -- ein Codeblock
+         | C String AST   -- ein Codeblock
          | SL [AST]       -- eine sortierte Liste
          | DOT            -- ein Punkt
          | Id AST         -- eine Link ID
          | Link AST       -- der Link
          | DDot           -- ein Doppelpunkt
+         | Bold String AST-- Fettdruck
     deriving (Show)

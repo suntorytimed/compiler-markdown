@@ -21,9 +21,11 @@ generateHTML' (UL lis) = "<ul>\n" ++ concat (map generateHTML' lis) ++ "</ul>\n"
 -- Listenelemente
 generateHTML' (LI ast) = "<li>" ++ generateHTML' ast ++ "</li>\n"
 -- ein Absatz
-generateHTML' (P str)  = "<p>" ++ str ++ "</p>"
+generateHTML' (P str)  = str
 -- Code
-generateHTML' (C ast) = "<code>" ++ generateHTML' ast ++ "</code>\n"
+generateHTML' (C str ast) = "<code>" ++ str ++ generateHTML' ast ++ "</code>\n"
+-- Fettdruck
+generateHTML' (Bold str ast) = "<b>" ++ str ++ generateHTML' ast ++ "</b>\n"
 -- Punkt
 generateHTML' (DOT) = "."
 -- Doppelpunkt
