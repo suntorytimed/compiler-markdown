@@ -26,6 +26,8 @@ generateHTML' (P str)  = str
 generateHTML' (C str ast) = "<code>" ++ str ++ generateHTML' ast ++ "</code>\n"
 -- Fettdruck
 generateHTML' (Bold str ast) = "<b>" ++ str ++ generateHTML' ast ++ "</b>\n"
+-- Kursiv
+generateHTML' (Kurs str ast) = "<i>" ++ str ++ generateHTML' ast ++ "</i>\n"
 -- Punkt
 generateHTML' (DOT) = "."
 -- Doppelpunkt

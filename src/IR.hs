@@ -14,4 +14,5 @@ data AST = Sequence [AST] -- eine Sequenz von HTML-Elementen
          | Link AST       -- der Link
          | DDot           -- ein Doppelpunkt
          | Bold String AST-- Fettdruck
+         | Kurs String AST-- Fettdruck
     deriving (Show)

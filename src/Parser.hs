@@ -31,6 +31,12 @@ parse (T_Minus : xs) =
         in case parse content of
             Nothing -> Nothing
             Just contentString -> fmap (addULI (LI contentString)) $ parse rest
+--parse (T_Star 1 : xs) =
+--    let (content, rest) = span(/=T_Newline) xs
+--        in case parse content of
+--            Nothing -> Nothing
+--            Just contentString -> fmap (addULI (LI contentString)) $ parse rest
+
 -- einem listitem-Marker muss auch ein Text folgen. Das gibt zusammen ein Listitem im AST.
 -- es wird mit der Hilfsfunktion addLI eingefügt
 parse (T_Num i: T_Dot : xs) =
@@ -38,6 +44,7 @@ parse (T_Num i: T_Dot : xs) =
         in case parse content of
             Nothing -> Nothing
             Just contentString -> fmap (addSLI (LI contentString)) $ parse rest
+
 -- ein Text am Anfang gehört in einen Absatz. Damit direkt auf einander folgende Texte in einem gemeinsamen
 -- Absatz landen, wird die Hilfsfunktion addP genutzt um den Text einzufügen
 parse (T_Text str: xs)         = fmap (addP (P str)) $ parse xs
@@ -48,13 +55,21 @@ parse (T_White i : T_Text str: xs)
             in case parse content of
                 Nothing -> Nothing
                 Just contentString -> fmap (addP (C str contentString)) $ parse rest
--- Fettdruck
-parse (T_Star i : T_Text str: xs) =
-    let (content, rest) = span(/=T_Star i) xs
-        in case parse content of
-            Nothing -> Nothing
-            Just contentString ->fmap (addP (Bold str contentString)) $ parse rest
+
+-- Fettdruck, Kursiv
+parse (T_Star i : T_Text str: xs)
+    |i==1 =
+        let (content, rest) = span(/=T_Star 1) xs
+            in case parse content of
+                Nothing -> Nothing
+                Just contentString ->fmap (addP (Bold str contentString)) $ parse rest
+    |i==2 =
+        let (content, rest) = span(/=T_Star 2) xs
+            in case parse content of
+                Nothing -> Nothing
+                Just contentString ->fmap (addP (Kurs str contentString)) $ parse rest
 parse (T_Star i : xs) = fmap (addP (P "")) $ parse xs
+
 -- href
 parse (T_SBracketO: xs) =
     let (content, rest) = span(/=T_SBracketC) xs

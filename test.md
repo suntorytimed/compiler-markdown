@@ -8,6 +8,8 @@
 -   zweites Bullet
 -   drittes Bullet   
 + fuenftes
+*sechstes*
+**sechstes**
 \\
 
 ### noch H3
@@ -19,7 +21,6 @@
 
 *Hallo du*
 
-[test link](http://www.google.de/)
 
 ########## und trotz vieler     vieler Hashes "nur" H6
 
