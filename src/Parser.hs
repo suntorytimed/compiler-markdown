@@ -31,11 +31,11 @@ parse (T_Minus : xs) =
         in case parse content of
             Nothing -> Nothing
             Just contentString -> fmap (addULI (LI contentString)) $ parse rest
---parse (T_Star 1 : T_White i : xs) =
---    let (content, rest) = span(/=T_Newline) xs
---        in case parse content of
---            Nothing -> Nothing
---            Just contentString -> fmap (addULI (LI contentString)) $ parse rest
+parse (T_Star 1 : T_White i : xs) =
+    let (content, rest) = span(/=T_Newline) xs
+        in case parse content of
+            Nothing -> Nothing
+            Just contentString -> fmap (addULI (LI contentString)) $ parse rest
 
 -- einem listitem-Marker muss auch ein Text folgen. Das gibt zusammen ein Listitem im AST.
 -- es wird mit der Hilfsfunktion addLI eingefügt
