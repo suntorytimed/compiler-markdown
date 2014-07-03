@@ -8,8 +8,8 @@
 -   zweites Bullet
 -   drittes Bullet   
 + fuenftes
-*sechstes*
-**sechstes**
+*kursiv*
+**fett**
 aber *auch* m**itt**en im wort
 \\
 
@@ -18,9 +18,7 @@ aber *auch* m**itt**en im wort
 -   huhu
 -   toll
 <http://www.google.de/>
--
 
-*Hallo du*
 [Test Link](http://www.golem.de/)
 
 
@@ -30,13 +28,3 @@ Hier  steht einfach\\
 nur Text.
     hallo
     jennifer l. xyz abc
-
-7777777
-Und
-das 
-ist
-ein
-zweiter
-Paragraph.
-
--   toll
