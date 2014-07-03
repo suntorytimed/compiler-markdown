@@ -8,6 +8,7 @@
 -   zweites Bullet
 -   drittes Bullet   
 + fuenftes
+* sechstes Listenelement
 *sechstes*
 **sechstes**
 aber *auch* m**itt**en im wort
