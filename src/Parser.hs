@@ -31,7 +31,7 @@ parse (T_Minus : xs) =
         in case parse content of
             Nothing -> Nothing
             Just contentString -> fmap (addULI (LI contentString)) $ parse rest
---parse (T_Star 1 : xs) =
+--parse (T_Star 1 : T_White i : xs) =
 --    let (content, rest) = span(/=T_Newline) xs
 --        in case parse content of
 --            Nothing -> Nothing
@@ -62,26 +62,25 @@ parse (T_Star i : T_Text str: xs)
         let (content, rest) = span(/=T_Star 1) xs
             in case parse content of
                 Nothing -> Nothing
-                Just contentString ->fmap (addP (Bold str contentString)) $ parse rest
+                Just contentString ->fmap (addP (Bold str contentString)) $ parse $ tail rest
     |i==2 =
         let (content, rest) = span(/=T_Star 2) xs
             in case parse content of
                 Nothing -> Nothing
-                Just contentString ->fmap (addP (Kurs str contentString)) $ parse rest
-parse (T_Star i : xs) = fmap (addP (P "")) $ parse xs
+                Just contentString ->fmap (addP (Kurs str contentString)) $ parse $ tail rest
 
 -- href
 parse (T_SBracketO: xs) =
     let (content, rest) = span(/=T_SBracketC) xs
         in case parse content of
             Nothing -> Nothing
-            Just contentString -> fmap (addID (Id contentString)) $ parse rest
+            Just contentString -> fmap (addID (Id contentString)) $ parse $ tail rest
 -- link
 parse (T_RBracketO: xs) =
     let (content, rest) = span(/=T_RBracketC) xs
         in case parse content of
             Nothing -> Nothing
-            Just contentString -> fmap (addLink (Link contentString)) $ parse rest
+            Just contentString -> fmap (addLink (Link contentString)) $ parse $ tail rest
 -- ein automatischer Link wird eingefügt
 parse (T_ABracketO : xs) =
     let (content, rest) = span(/=T_ABracketC) xs
@@ -158,7 +157,8 @@ addSLI li (Sequence ast) = Sequence (SL [li] : ast)
 addLink :: AST -> AST -> AST
 addLink (Link link) (Sequence ast) = Sequence (Link link : ast)
 addID :: AST -> AST -> AST
-addID (Id id) (Sequence ast) = Sequence (Id id : ast)
+addID (Id id) (Sequence (Link link : ast)) = Sequence (Link link: Id id : ast)
+addID id (Sequence ast) = Sequence (id : ast)
 
 -- Einfügen eines automatischen Links
 addLi :: (AST,AST) -> AST -> AST
